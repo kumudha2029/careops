@@ -7,7 +7,8 @@ import {
   deleteBooking,
 } from "../services/api";
 
-export default function Bookings({ workspaceId }) {
+export default function Bookings() {
+  const workspaceId = localStorage.getItem("workspace_id");
   const [bookings, setBookings] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
   const [editingId, setEditingId] = useState(null);

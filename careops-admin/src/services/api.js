@@ -150,16 +150,11 @@ export const convertLead = async (id) => {
   });
 
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.detail || "Failed to convert lead");
+    throw new Error("Failed to convert lead");
   }
 
   return await res.json();
 };
-
-/* ========================================= */
-/* =============== BOOKINGS ================= */
-/* ========================================= */
 
 export const getBookings = async (workspaceId) => {
   const res = await fetch(`${BASE_URL}/bookings/${workspaceId}`);
