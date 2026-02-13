@@ -75,7 +75,6 @@ def convert_lead(lead_id: int, db: Session = Depends(get_db)):
     }
 
 
-# ================= DELETE LEAD =================
 @router.delete("/{lead_id}")
 def delete_lead(lead_id: int, db: Session = Depends(get_db)):
 
@@ -83,6 +82,9 @@ def delete_lead(lead_id: int, db: Session = Depends(get_db)):
 
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
+
+    # 🔥 Delete related bookings first
+    db.query(Booking).filter(Booking.lead_id == lead_id).delete()
 
     db.delete(lead)
     db.commit()

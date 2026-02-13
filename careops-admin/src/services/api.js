@@ -167,7 +167,7 @@ export const getBookings = async (workspaceId) => {
 };
 
 export const updateBookingStatus = async (id, data) => {
-  const res = await fetch(`${BASE_URL}/bookings/status/${id}`, {
+  const res = await fetch(`${BASE_URL}/bookings/${id}/status`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
