@@ -28,7 +28,7 @@ origins = [
     "https://careops-opal.vercel.app",
 
     # Admin App (Vercel)
-    "https://careops-6az1xff06-kumudhasris-projects.vercel.app",
+    "https://care-ops-admin.vercel.app",
 ]
 
 app.add_middleware(
