@@ -10,7 +10,8 @@ export default function Verify() {
   useEffect(() => {
     fetch(`${BASE_URL}/public/verify/${token}`)
       .then(res => res.json())
-      .then(data => setMessage(data.message));
+      .then(data => setMessage(data.message))
+      .catch(() => setMessage("Verification failed"));
   }, [token]);
 
   return (
@@ -19,3 +20,4 @@ export default function Verify() {
     </div>
   );
 }
+

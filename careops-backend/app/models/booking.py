@@ -15,7 +15,7 @@ class Booking(Base):
     phone = Column(String, nullable=False)
     email = Column(String, nullable=True)
 
-    status = Column(String, default="SHEDULED")
+    status = Column(String, default="SCHEDULED")
 
     appointment_date = Column(Date, nullable=True)
     appointment_time = Column(String, nullable=True)
