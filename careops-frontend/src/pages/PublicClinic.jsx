@@ -118,7 +118,7 @@ export default function PublicClinic() {
           <HeroLeft>
             <Badge>Trusted Healthcare Platform</Badge>
 
-            <HeroTitle>{clinicName}</HeroTitle>
+            <HeroTitle>Care Plus</HeroTitle>
 
             <HeroSubtitle>
               Modern diagnostics. Experienced specialists.

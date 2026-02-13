@@ -6,8 +6,12 @@ from app.models.workspace import Workspace
 from pydantic import BaseModel, EmailStr
 from datetime import date
 import uuid
+import os
+import resend
 
 router = APIRouter(prefix="/public", tags=["Public"])
+
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 # =========================
 # SCHEMA
@@ -21,6 +25,10 @@ class PublicBookingCreate(BaseModel):
     appointment_time: str
 
 
+# =========================
+# GET PUBLIC CLINIC INFO
+# =========================
+
 @router.get("/clinic/{workspace_id}")
 def get_public_clinic(workspace_id: int, db: Session = Depends(get_db)):
 
@@ -32,8 +40,9 @@ def get_public_clinic(workspace_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Clinic not found")
 
     return {
-        "clinic_name": workspace.name   # 🔥 FIXED
+        "clinic_name": workspace.name
     }
+
 
 # =========================
 # CREATE PUBLIC BOOKING
@@ -46,7 +55,6 @@ def public_booking(
     db: Session = Depends(get_db)
 ):
 
-    # Check if workspace exists
     workspace = db.query(Workspace).filter(
         Workspace.id == workspace_id
     ).first()
@@ -54,7 +62,6 @@ def public_booking(
     if not workspace:
         raise HTTPException(status_code=404, detail="Clinic not found")
 
-    # Generate verification token
     token = str(uuid.uuid4())
 
     booking = Booking(
@@ -73,11 +80,37 @@ def public_booking(
     db.commit()
     db.refresh(booking)
 
-    print("Booking created successfully (email disabled)")
+    # =========================
+    # SEND EMAIL VIA RESEND
+    # =========================
+
+        # =========================
+    # SEND EMAIL VIA RESEND
+    # =========================
+
+    try:
+        verify_link = f"{os.getenv('FRONTEND_URL')}/verify/{token}"
+
+        response = resend.Emails.send({
+            "from": "CareOps <onboarding@resend.dev>",
+            "to": ["kumudha2920@gmail.com"],  # your signup email
+            "subject": "Confirm Your Appointment",
+            "html": f"""
+                <h2>Confirm Your Appointment</h2>
+                <p><b>Name:</b> {booking.patient_name}</p>
+                <p><b>Date:</b> {booking.appointment_date}</p>
+                <p><b>Time:</b> {booking.appointment_time}</p>
+                <a href="{verify_link}">Confirm Appointment</a>
+            """
+        })
+
+        print("RESEND RESPONSE:", response)
+
+    except Exception as e:
+        print("Email failed:", str(e))
 
     return {
-        "message": "Booking created successfully.",
-        "verification_token": token  # for testing only
+        "message": "Booking created. Please check your email to verify."
     }
 
 
