@@ -5,10 +5,7 @@ from app.models.booking import Booking
 from app.models.workspace import Workspace
 from pydantic import BaseModel, EmailStr
 from datetime import date
-from email.message import EmailMessage
-import smtplib
 import uuid
-import os
 
 router = APIRouter(prefix="/public", tags=["Public"])
 
@@ -24,12 +21,19 @@ class PublicBookingCreate(BaseModel):
     appointment_time: str
 
 
-# =========================
-# GET PUBLIC CLINIC INFO
-# =========================
 @router.get("/clinic/{workspace_id}")
-def get_public_clinic(workspace_id: int):
-    return {"clinic_name": "Test Clinic"}
+def get_public_clinic(workspace_id: int, db: Session = Depends(get_db)):
+
+    workspace = db.query(Workspace).filter(
+        Workspace.id == workspace_id
+    ).first()
+
+    if not workspace:
+        raise HTTPException(status_code=404, detail="Clinic not found")
+
+    return {
+        "clinic_name": workspace.name   # 🔥 FIXED
+    }
 
 # =========================
 # CREATE PUBLIC BOOKING
@@ -41,6 +45,7 @@ def public_booking(
     data: PublicBookingCreate,
     db: Session = Depends(get_db)
 ):
+
     # Check if workspace exists
     workspace = db.query(Workspace).filter(
         Workspace.id == workspace_id
@@ -68,82 +73,12 @@ def public_booking(
     db.commit()
     db.refresh(booking)
 
-    # =========================
-    # SEND VERIFICATION EMAIL
-    # =========================
+    print("Booking created successfully (email disabled)")
 
-    try:
-        FRONTEND_URL = os.getenv("FRONTEND_URL")
-        EMAIL_USER = os.getenv("EMAIL_USER")
-        EMAIL_PASS = os.getenv("EMAIL_PASS")
-
-        verify_link = f"{FRONTEND_URL}/verify/{token}"
-
-        msg = EmailMessage()
-        msg["Subject"] = "Confirm Your Appointment - CareOps Clinic"
-        msg["From"] = EMAIL_USER
-        msg["To"] = booking.email
-
-        msg.set_content(f"""
-Dear {booking.patient_name},
-
-Your appointment request has been received.
-
-Date: {booking.appointment_date}
-Time: {booking.appointment_time}
-
-Please confirm your appointment using this link:
-{verify_link}
-
-Thank you,
-CareOps Clinic
-""")
-
-        msg.add_alternative(f"""
-        <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2 style="color:#2563eb;">Confirm Your Appointment</h2>
-
-            <p>Dear <b>{booking.patient_name}</b>,</p>
-
-            <p>Your appointment details:</p>
-
-            <ul>
-                <li><b>Date:</b> {booking.appointment_date}</li>
-                <li><b>Time:</b> {booking.appointment_time}</li>
-            </ul>
-
-            <p>Please confirm your booking:</p>
-
-            <p>
-                <a href="{verify_link}"
-                   style="background-color:#2563eb;
-                          color:white;
-                          padding:12px 20px;
-                          text-decoration:none;
-                          border-radius:6px;">
-                    Confirm Appointment
-                </a>
-            </p>
-
-            <p>If you did not request this booking, ignore this email.</p>
-
-            <p>Regards,<br/>CareOps Clinic</p>
-        </body>
-        </html>
-        """, subtype="html")
-
-        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
-            smtp.starttls()
-            smtp.login(EMAIL_USER, EMAIL_PASS)
-            smtp.send_message(msg)
-
-        print("Verification email sent successfully")
-
-    except Exception as e:
-        print("Email sending failed:", e)
-
-    return {"message": "Booking created. Please check your email to verify."}
+    return {
+        "message": "Booking created successfully.",
+        "verification_token": token  # for testing only
+    }
 
 
 # =========================
