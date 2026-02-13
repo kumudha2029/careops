@@ -93,7 +93,8 @@ def public_booking(
 
         response = resend.Emails.send({
             "from": "CareOps <onboarding@resend.dev>",
-            "to": ["kumudha2920@gmail.com"],  # your signup email
+            "to": [booking.email],
+ # your signup email
             "subject": "Confirm Your Appointment",
             "html": f"""
                 <h2>Confirm Your Appointment</h2>
