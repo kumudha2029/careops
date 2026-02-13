@@ -435,6 +435,5 @@ const FooterTitle = styled.h3`
 
 const FooterText = styled.p`
   margin: 5px 0;
-`;  import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+`;  
 
