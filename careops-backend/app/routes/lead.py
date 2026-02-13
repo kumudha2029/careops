@@ -52,14 +52,19 @@ def convert_lead(lead_id: int, db: Session = Depends(get_db)):
     if lead.status == "CONVERTED":
         raise HTTPException(status_code=400, detail="Already converted")
 
+    # ✅ Update lead status properly
     lead.status = "CONVERTED"
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
 
+    # ✅ Create booking
     booking = Booking(
         lead_id=lead.id,
         workspace_id=lead.workspace_id,
         patient_name=lead.name,
         phone=lead.phone,
-        email=lead.email,   # ✅ NOW SAFE
+        email=lead.email,
         status="SCHEDULED",
         appointment_date=date.today(),
         appointment_time=None
@@ -73,8 +78,6 @@ def convert_lead(lead_id: int, db: Session = Depends(get_db)):
         "message": "Lead converted successfully",
         "booking_id": booking.id
     }
-
-
 @router.delete("/{lead_id}")
 def delete_lead(lead_id: int, db: Session = Depends(get_db)):
 
