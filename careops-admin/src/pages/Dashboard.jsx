@@ -6,16 +6,17 @@ import { getDashboardStats } from "../services/api";
 
 export default function Dashboard() {
 
-  const workspaceId = 1;
+
+const workspaceId = localStorage.getItem("workspace_id");
+
 
   const [activeTab, setActiveTab] = useState("overview");
   const [stats, setStats] = useState(null);
-
-  useEffect(() => {
-    if (activeTab === "overview") {
-      loadStats();
-    }
-  }, [activeTab]);
+useEffect(() => {
+  if (workspaceId) {
+    loadStats();
+  }
+}, [activeTab, workspaceId]);
 
   const loadStats = async () => {
     try {
