@@ -8,7 +8,7 @@ import {
 } from "../services/api";
 
 export default function Bookings() {
-  const workspaceId = localStorage.getItem("workspace_id");
+  const workspaceId = 1; 
   const [bookings, setBookings] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
   const [editingId, setEditingId] = useState(null);
