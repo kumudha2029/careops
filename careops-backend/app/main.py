@@ -18,10 +18,17 @@ app = FastAPI()
 
 # ✅ Proper CORS Configuration
 origins = [
+    # Local development
     "http://localhost:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
+
+    # Patient App (Vercel)
+    "https://careops-opal.vercel.app",
+
+    # Admin App (Vercel)
+    "https://careops-6az1xff06-kumudhasris-projects.vercel.app",
 ]
 
 app.add_middleware(
