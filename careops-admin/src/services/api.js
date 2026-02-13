@@ -145,12 +145,13 @@ export const deleteLead = async (id) => {
 };
 
 export const convertLead = async (id) => {
-  const res = await fetch(`${BASE_URL}/leads/convert/${id}`, {
-    method: "POST",
+  const res = await fetch(`${BASE_URL}/leads/${id}/convert`, {
+    method: "PUT",
   });
 
   if (!res.ok) {
-    throw new Error("Failed to convert lead");
+    const err = await res.json();
+    throw new Error(err.detail || "Failed to convert lead");
   }
 
   return await res.json();
