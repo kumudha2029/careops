@@ -7,11 +7,10 @@ from pydantic import BaseModel, EmailStr
 from datetime import date
 import uuid
 import os
-import resend
+import smtplib
+from email.message import EmailMessage
 
 router = APIRouter(prefix="/public", tags=["Public"])
-
-resend.api_key = os.getenv("RESEND_API_KEY")
 
 # =========================
 # SCHEMA
@@ -81,31 +80,52 @@ def public_booking(
     db.refresh(booking)
 
     # =========================
-    # SEND EMAIL VIA RESEND
-    # =========================
-
-        # =========================
-    # SEND EMAIL VIA RESEND
+    # SEND EMAIL VIA GMAIL SMTP
     # =========================
 
     try:
         verify_link = f"{os.getenv('FRONTEND_URL')}/verify/{token}"
 
-        response = resend.Emails.send({
-            "from": "CareOps <onboarding@resend.dev>",
-            "to": [booking.email],
- # your signup email
-            "subject": "Confirm Your Appointment",
-            "html": f"""
-                <h2>Confirm Your Appointment</h2>
-                <p><b>Name:</b> {booking.patient_name}</p>
-                <p><b>Date:</b> {booking.appointment_date}</p>
-                <p><b>Time:</b> {booking.appointment_time}</p>
-                <a href="{verify_link}">Confirm Appointment</a>
-            """
-        })
+        msg = EmailMessage()
+        msg["Subject"] = "Appointment Confirmation - CareOps Clinic"
+        msg["From"] = os.getenv("EMAIL_USER")
+        msg["To"] = booking.email
 
-        print("RESEND RESPONSE:", response)
+        msg.set_content(f"""
+Appointment Confirmation
+
+Dear {booking.patient_name},
+
+Your appointment has been scheduled with the following details:
+
+Date: {booking.appointment_date}
+Time: {booking.appointment_time}
+Address: 123 Health Street, Chennai
+Contact: 12345677
+
+Please confirm your booking:
+{verify_link}
+
+Please bring:
+- Valid ID proof
+- Previous medical records
+- Insurance documents (if applicable)
+
+Please arrive 15 minutes early.
+
+Regards,
+CareOps Clinic
+""")
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(
+                os.getenv("EMAIL_USER"),
+                os.getenv("EMAIL_PASS")
+            )
+            server.send_message(msg)
+
+        print("Email sent successfully")
 
     except Exception as e:
         print("Email failed:", str(e))

@@ -15,11 +15,17 @@ export default function Bookings() {
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
 
-  // Load bookings when workspaceId changes
+  // 🔥 AUTO REFRESH BOOKING LIST
   useEffect(() => {
-    if (workspaceId) {
+    if (!workspaceId) return;
+
+    loadBookings(); // initial load
+
+    const interval = setInterval(() => {
       loadBookings();
-    }
+    }, 5000); // refresh every 5 seconds
+
+    return () => clearInterval(interval);
   }, [workspaceId]);
 
   const loadBookings = async () => {
@@ -73,18 +79,18 @@ export default function Bookings() {
     }
   };
 
-const handleDelete = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this booking?")) {
-    return;
-  }
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this booking?")) {
+      return;
+    }
 
-  try {
-    await deleteBooking(id);
-    await loadBookings();
-  } catch (err) {
-    console.error("Delete failed", err);
-  }
-};
+    try {
+      await deleteBooking(id);
+      await loadBookings();
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
 
   return (
     <Wrapper>
@@ -197,6 +203,9 @@ const handleDelete = async (id) => {
     </Wrapper>
   );
 }
+
+/* ================= STYLES ================= */
+
 const Wrapper = styled.div`
   background: white;
   padding: 30px;
@@ -236,7 +245,9 @@ const StatusBadge = styled.span`
       ? "#3b82f6"
       : props.$status === "COMPLETED"
       ? "#10b981"
-      : "#ef4444"};
+      : props.$status === "CANCELLED"
+      ? "#ef4444"
+      : "#f59e0b"};
 `;
 
 const CompleteBtn = styled.button`
@@ -247,10 +258,6 @@ const CompleteBtn = styled.button`
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-
-  &:hover {
-    background: #15803d;
-  }
 `;
 
 const CancelBtn = styled.button`
@@ -261,10 +268,6 @@ const CancelBtn = styled.button`
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-
-  &:hover {
-    background: #b91c1c;
-  }
 `;
 
 const RescheduleBtn = styled.button`
@@ -274,10 +277,6 @@ const RescheduleBtn = styled.button`
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-
-  &:hover {
-    background: #d97706;
-  }
 `;
 
 const RescheduleBox = styled.div`
@@ -306,17 +305,6 @@ const SaveBtn = styled.button`
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-
-  &:hover {
-    background: #1d4ed8;
-  }
-`;
-
-const Empty = styled.p`
-  padding: 20px;
-  text-align: center;
-  font-weight: 500;
-  color: #6b7280;
 `;
 
 const DeleteBtn = styled.button`
@@ -327,8 +315,11 @@ const DeleteBtn = styled.button`
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
+`;
 
-  &:hover {
-    background: #4b5563;
-  }
+const Empty = styled.p`
+  padding: 20px;
+  text-align: center;
+  font-weight: 500;
+  color: #6b7280;
 `;
