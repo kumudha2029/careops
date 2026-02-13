@@ -23,11 +23,12 @@ origins = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
 
-    # Netlify Admin (ADD THIS)
+    # Netlify Admin
     "https://careops-admin.netlify.app",
 
-    # Optional: keep Vercel if still used
-    "https://care-ops-admin.vercel.app",
+    # Patient Netlify (ADD THIS)
+    "https://cosmic-fudge-a182fa.netlify.app",
+
 ]
 
 app.add_middleware(
