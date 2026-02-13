@@ -16,7 +16,6 @@ from app.routes import public
 
 app = FastAPI()
 
-# ✅ Proper CORS Configuration
 origins = [
     # Local development
     "http://localhost:5173",
@@ -24,10 +23,10 @@ origins = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
 
-    # Patient App (Vercel)
-    "https://careops-opal.vercel.app",
+    # Netlify Admin (ADD THIS)
+    "https://careops-admin.netlify.app",
 
-    # Admin App (Vercel)
+    # Optional: keep Vercel if still used
     "https://care-ops-admin.vercel.app",
 ]
 
