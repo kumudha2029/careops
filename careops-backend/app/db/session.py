@@ -2,12 +2,11 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = os.getenv("postgresql://careops_user:FDwHMjlhjIyZ8Qy0ByVH0f2PS2NbkgyN@dpg-d678m5usb7us73e2dmg0-a/careops")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}
-)
+print("DATABASE_URL:", DATABASE_URL)
+
+engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(
     autocommit=False,
