@@ -108,7 +108,7 @@ export const getDashboardStats = async (workspaceId) => {
 /* ========================================= */
 
 export const getLeads = async (workspaceId) => {
-  const res = await fetch(`${BASE_URL}/leads/${workspaceId}`);
+  const res = await fetch(`${BASE_URL}/leads/workspace/${workspaceId}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch leads");
