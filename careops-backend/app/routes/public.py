@@ -7,10 +7,12 @@ from pydantic import BaseModel, EmailStr
 from datetime import date
 import uuid
 import os
-import smtplib
-from email.message import EmailMessage
+import resend
 
 router = APIRouter(prefix="/public", tags=["Public"])
+
+# 🔥 SET RESEND API KEY
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 # =========================
 # SCHEMA
@@ -38,9 +40,7 @@ def get_public_clinic(workspace_id: int, db: Session = Depends(get_db)):
     if not workspace:
         raise HTTPException(status_code=404, detail="Clinic not found")
 
-    return {
-        "clinic_name": workspace.name
-    }
+    return {"clinic_name": workspace.name}
 
 
 # =========================
@@ -80,59 +80,56 @@ def public_booking(
     db.refresh(booking)
 
     # =========================
-    # SEND EMAIL VIA GMAIL SMTP
+    # SEND EMAIL VIA RESEND
     # =========================
 
     try:
         verify_link = f"{os.getenv('FRONTEND_URL')}/verify/{token}"
 
-        msg = EmailMessage()
-        msg["Subject"] = "Appointment Confirmation - CareOps Clinic"
-        msg["From"] = os.getenv("EMAIL_USER")
-        msg["To"] = booking.email
+        response = resend.Emails.send({
+            "from": "CareOps <onboarding@resend.dev>",
+            "to": [booking.email],
+            "subject": "Appointment Confirmation - CareOps Clinic",
+            "html": f"""
+                <h2>Appointment Confirmation</h2>
+                <p>Dear <b>{booking.patient_name}</b>,</p>
 
-        msg.set_content(f"""
-Appointment Confirmation
+                <p>Your appointment has been scheduled with the following details:</p>
 
-Dear {booking.patient_name},
+                <ul>
+                    <li><b>Date:</b> {booking.appointment_date}</li>
+                    <li><b>Time:</b> {booking.appointment_time}</li>
+                    <li><b>Address:</b> 123 Health Street, Chennai</li>
+                    <li><b>Contact:</b> 12345677</li>
+                </ul>
 
-Your appointment has been scheduled with the following details:
+                <p>Please confirm your booking:</p>
 
-Date: {booking.appointment_date}
-Time: {booking.appointment_time}
-Address: 123 Health Street, Chennai
-Contact: 12345677
+                <a href="{verify_link}"
+                   style="background:#2563eb;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;">
+                   Confirm Appointment
+                </a>
 
-Please confirm your booking:
-{verify_link}
+                <br/><br/>
+                <p><b>Please bring:</b></p>
+                <ul>
+                    <li>Valid ID proof</li>
+                    <li>Previous medical records</li>
+                    <li>Insurance documents (if applicable)</li>
+                </ul>
 
-Please bring:
-- Valid ID proof
-- Previous medical records
-- Insurance documents (if applicable)
+                <p>Please arrive 15 minutes early.</p>
 
-Please arrive 15 minutes early.
+                <p>Regards,<br/>CareOps Clinic</p>
+            """
+        })
 
-Regards,
-CareOps Clinic
-""")
-
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(
-                os.getenv("EMAIL_USER"),
-                os.getenv("EMAIL_PASS")
-            )
-            server.send_message(msg)
-
-        print("Email sent successfully")
+        print("RESEND RESPONSE:", response)
 
     except Exception as e:
         print("Email failed:", str(e))
 
-    return {
-        "message": "Booking created. Please check your email to verify."
-    }
+    return {"message": "Booking created. Please check your email to verify."}
 
 
 # =========================
