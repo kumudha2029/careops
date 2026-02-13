@@ -6,7 +6,6 @@ import { getDashboardStats } from "../services/api";
 
 export default function Dashboard() {
 
-  // 🔥 FORCE DEFAULT WORKSPACE
   const workspaceId = 1;
 
   const [activeTab, setActiveTab] = useState("overview");

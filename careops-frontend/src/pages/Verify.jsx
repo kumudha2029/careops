@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://careops-ixxy.onrender.com";
 
 export default function Verify() {
   const { token } = useParams();
