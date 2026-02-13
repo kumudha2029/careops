@@ -27,7 +27,7 @@ origins = [
     "https://careops-admin.netlify.app",
 
     # Patient Netlify (ADD THIS)
-    "https://cosmic-fudge-a182fa.netlify.app",
+    "https://careopspatient.netlify.app/clinic/1",
 
 ]
 
