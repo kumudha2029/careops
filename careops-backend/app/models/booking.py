@@ -26,5 +26,5 @@ class Booking(Base):
         String,
         default=lambda: str(uuid.uuid4()),
         unique=True,
-        nullable=False
+        nullable=True
     )

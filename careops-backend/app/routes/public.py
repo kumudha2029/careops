@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.deps import get_db
 from app.models.booking import Booking
+from app.models.workspace import Workspace
 from pydantic import BaseModel, EmailStr
 from datetime import date
 from email.message import EmailMessage
@@ -10,7 +11,6 @@ import uuid
 import os
 
 router = APIRouter(prefix="/public", tags=["Public"])
-
 
 # =========================
 # SCHEMA
@@ -25,6 +25,24 @@ class PublicBookingCreate(BaseModel):
 
 
 # =========================
+# GET PUBLIC CLINIC INFO
+# =========================
+
+@router.get("/clinic/{workspace_id}")
+def get_public_clinic(workspace_id: int, db: Session = Depends(get_db)):
+    workspace = db.query(Workspace).filter(
+        Workspace.id == workspace_id
+    ).first()
+
+    if not workspace:
+        raise HTTPException(status_code=404, detail="Clinic not found")
+
+    return {
+        "clinic_name": workspace.clinic_name
+    }
+
+
+# =========================
 # CREATE PUBLIC BOOKING
 # =========================
 
@@ -34,7 +52,15 @@ def public_booking(
     data: PublicBookingCreate,
     db: Session = Depends(get_db)
 ):
-    # Generate unique verification token
+    # Check if workspace exists
+    workspace = db.query(Workspace).filter(
+        Workspace.id == workspace_id
+    ).first()
+
+    if not workspace:
+        raise HTTPException(status_code=404, detail="Clinic not found")
+
+    # Generate verification token
     token = str(uuid.uuid4())
 
     booking = Booking(
@@ -45,13 +71,18 @@ def public_booking(
         appointment_date=data.appointment_date,
         appointment_time=data.appointment_time,
         status="PENDING",
+        verification_token=token,
+        is_verified=False
     )
 
     db.add(booking)
     db.commit()
     db.refresh(booking)
 
-    # Send verification email
+    # =========================
+    # SEND VERIFICATION EMAIL
+    # =========================
+
     try:
         FRONTEND_URL = os.getenv("FRONTEND_URL")
         EMAIL_USER = os.getenv("EMAIL_USER")
@@ -64,7 +95,6 @@ def public_booking(
         msg["From"] = EMAIL_USER
         msg["To"] = booking.email
 
-        # Plain text fallback
         msg.set_content(f"""
 Dear {booking.patient_name},
 
@@ -80,7 +110,6 @@ Thank you,
 CareOps Clinic
 """)
 
-        # HTML Version
         msg.add_alternative(f"""
         <html>
         <body style="font-family: Arial, sans-serif;">
