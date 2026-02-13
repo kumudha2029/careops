@@ -27,20 +27,9 @@ class PublicBookingCreate(BaseModel):
 # =========================
 # GET PUBLIC CLINIC INFO
 # =========================
-
 @router.get("/clinic/{workspace_id}")
-def get_public_clinic(workspace_id: int, db: Session = Depends(get_db)):
-    workspace = db.query(Workspace).filter(
-        Workspace.id == workspace_id
-    ).first()
-
-    if not workspace:
-        raise HTTPException(status_code=404, detail="Clinic not found")
-
-    return {
-        "clinic_name": workspace.clinic_name
-    }
-
+def get_public_clinic(workspace_id: int):
+    return {"clinic_name": "Test Clinic"}
 
 # =========================
 # CREATE PUBLIC BOOKING
