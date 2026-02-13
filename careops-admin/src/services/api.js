@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 /* ========================================= */
 /* ================= AUTH ================== */
@@ -34,7 +34,6 @@ export const login = async (data) => {
   return await res.json();
 };
 
-
 /* ========================================= */
 /* ============ WORKSPACE ================== */
 /* ========================================= */
@@ -54,6 +53,19 @@ export const createWorkspace = async (data) => {
   return await res.json();
 };
 
+export const activateWorkspace = async (workspaceId) => {
+  const res = await fetch(`${BASE_URL}/workspace/${workspaceId}/activate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Activation failed");
+  }
+
+  return await res.json();
+};
 
 /* ========================================= */
 /* ============== EMAIL ==================== */
@@ -74,7 +86,6 @@ export const setupEmail = async (data) => {
   return await res.json();
 };
 
-
 /* ========================================= */
 /* ============== DASHBOARD ================ */
 /* ========================================= */
@@ -88,7 +99,6 @@ export const getDashboardStats = async (workspaceId) => {
 
   return await res.json();
 };
-
 
 /* ========================================= */
 /* ================ LEADS ================== */
@@ -143,7 +153,6 @@ export const convertLead = async (id) => {
   return await res.json();
 };
 
-
 /* ========================================= */
 /* =============== BOOKINGS ================= */
 /* ========================================= */
@@ -187,12 +196,9 @@ export const rescheduleBooking = async (id, data) => {
 };
 
 export const deleteBooking = async (bookingId) => {
-  const res = await fetch(
-    `http://127.0.0.1:8000/bookings/${bookingId}`,
-    {
-      method: "DELETE",
-    }
-  );
+  const res = await fetch(`${BASE_URL}/bookings/${bookingId}`, {
+    method: "DELETE",
+  });
 
   if (!res.ok) {
     throw new Error("Failed to delete booking");
@@ -215,24 +221,6 @@ export const publicBooking = async (workspaceId, data) => {
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.detail || "Public booking failed");
-  }
-
-  return await res.json();
-};
-export const activateWorkspace = async (workspaceId) => {
-  const res = await fetch(
-    `http://127.0.0.1:8000/workspace/${workspaceId}/activate`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.detail || "Activation failed");
   }
 
   return await res.json();
